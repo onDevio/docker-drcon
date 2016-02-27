@@ -10,6 +10,18 @@ This repo provides a "template" to deploy [Registrator](https://github.com/glide
 
 Please note there's also other repos in GitHub about this topic. Just search for "drcon".
 
+## Why Service Discovery
+
+It's common to link containers together, so that container **A** can call services on container **B**.
+Docker provides the `--link` argument to make this possible.
+
+However, this is a very "static" way of linking containers. 
+The containers need to be running in advance to link to them.
+
+Some scenarios need a more dynamic approach, like **load balancing**.
+The number of containers to dispatch traffic load will change over time, so it's not possible to "statically" link to containers that will be created/destroyed in the future. 
+They need to get linked/unlinked as they come and go.
+
 # Getting started
 
 First, let's see all this in action. We'll talk about how it works later on.
