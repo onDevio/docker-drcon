@@ -1,0 +1,49 @@
+simple:
+  build: ./web
+  environment:
+    - SERVICE_NAME=simple
+
+consul:
+  image: progrium/consul
+  command: -server -bootstrap -log-level debug
+  hostname: node
+  ports:
+    - 8500:8500
+    - 8600:53/udp
+  environment:
+    - SERVICE_IGNORE=true
+
+resolvable:
+  image: mgood/resolvable
+  hostname: resolvable
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+    - /etc/resolv.conf:/tmp/resolv.conf
+  environment:
+    - SERVICE_IGNORE=true
+
+registrator:
+  image: gliderlabs/registrator
+  command: -internal consul://consul:8500
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+  links:
+    - consul
+  environment:
+    - SERVICE_IGNORE=true
+
+nginx:
+  build: ./nginx
+  links:
+    - consul
+  ports:
+    - 80:80
+    - 443:443
+  volumes:
+    - ./nginx/consul-templates/nginx-loadbalancer.conf:/etc/consul-templates/nginx.conf
+  environment:
+    - SERVICE_IGNORE=true
+
+stress:
+  build: ./ab
+  command: echo 'Usage docker-compose run stress ab -n 1000 -c 10 http://[DOCKER_IP|localhost]/'
