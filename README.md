@@ -24,7 +24,7 @@ They need to get linked/unlinked as they come and go.
 
 # Getting started
 
-First, let's see all this in action. We'll talk about how it works later on.
+First, let's see an example of **load balancing**. We'll talk about how it works later on.
 
 You'll need this software:
 
@@ -40,5 +40,18 @@ Step by step:
 4. Create containers: `docker-compose up -d`
 5. Check it's running: `docker-compose ps`. You should see a list of 5 containers running.
 
-Now point a web browser to http://localhost/web. You should see a welcome page.
+**A Note for Mac users**: If you are using Docker in Mac, replace "localhost" with Docker's IP for the rest of the article.
+You can find what's Docker's IP by running `docker-machine ip`.
 
+Now point a web browser to http://**localhost**/. You should see a welcome page.
+
+Try this before getting into how it works:
+
+1. Scale up the web to 3 containers: `docker-compose scale simple=3`
+2. Open another terminal to watch the logs: `docker-compose logs simple`
+3. Go back to the first terminal and stress test the app: `docker-compose stress ab -n 1000 -c 10 http://localhost/`
+4. Watch the logs again. See how traffic is dispatched to every `simple` container?
+ 
+Enough fun. Let's get to how it works.
+
+# How it works
