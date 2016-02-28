@@ -81,7 +81,8 @@ simple:
   environment:
     - SERVICE_NAME=simple
 
-# Consul service. It maps port 8500 and 8600. Point a browser to http://localhost:8500 to see Consul`s control panel.  
+# Consul service. It maps port 8500 and 8600. 
+# Point a browser to http://localhost:8500 to see Consul`s control panel.  
 
 consul:
   image: progrium/consul
@@ -93,7 +94,8 @@ consul:
   environment:
     - SERVICE_IGNORE=true
 
-# Registrator service. It links to Consul to be able to call the API to de/register information about containers that come and go.
+# Registrator service. It links to Consul to be able to call Consul's API 
+# to de/register information about containers that come and go.
 
 registrator:
   image: gliderlabs/registrator
