@@ -49,7 +49,7 @@ Step by step:
 4. Create containers: `docker-compose up -d`
 5. Check it's running: `docker-compose ps`. 
 
-You should see a list of 5 containers running.
+You should see a list of 5 containers, 4 of them running.
 
 ```
                   Name                                     Command                                     State                                      Ports                   
@@ -59,8 +59,8 @@ dockerdrcon_consul_1                       /bin/start -server -bootst ...       
                                                                                                                                  8400/tcp, 0.0.0.0:8500->8500/tcp         
 dockerdrcon_nginx_1                        /bin/sh -c /usr/sbin/nginx ...             Up                                         0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp 
 dockerdrcon_registrator_1                  /bin/registrator -internal ...             Up                                                                                  
-dockerdrcon_resolvable_1                   /bin/resolvable                            Up                                                                                  
 dockerdrcon_simple_1                       /bin/sh -c DEBUG=myapp:* n ...             Up                                         3000/tcp                                 
+dockerdrcon_stress_1                       echo Usage docker-compose  ...             Exit 0                              
 ```
 
 **A Note for Mac users**: If you are using Docker in Mac, replace "localhost" with Docker's IP for the rest of the article.
