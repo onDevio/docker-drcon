@@ -13,10 +13,19 @@ Please note there's also other repos in GitHub about this topic. Just search for
 ## Why Service Discovery
 
 It's common to link containers together, so that container **A** can call services on container **B**.
-Docker provides the `--link` argument to make this possible.
+Docker provides the `--link` argument to make it possible.
 
-However, this is a very "static" way of linking containers. 
-The containers need to be running in advance to link to them.
+Like so:
+
+```
+docker run -ti --name B some_img some_cmd
+```
+
+```
+docker run -ti --name A --link B some_img some_cmd
+```
+
+However, this is a very "static" way of linking containers: containers to link to (B in this example) need to be **running in advance**, must have a **fixed name**, and there must be a **fixed number** of them.
 
 Some scenarios need a more dynamic approach, like **load balancing**.
 The number of containers to dispatch traffic load will change over time, so it's not possible to "statically" link to containers that will be created/destroyed in the future. 
