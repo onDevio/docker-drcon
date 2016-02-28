@@ -117,6 +117,7 @@ registrator:
 # Nginx + Consul Template. It links to Consul to be able to make queries to update nginx config file.
 # It mounts a volume to map the template file (nginx-loadbalancer.conf) inside the container. 
 # Note there are no link to containers other than Consul.
+# Also, note it maps port 80, so you can hit http://localhost/
 
 nginx:
   build: ./nginx
@@ -136,3 +137,57 @@ stress:
   build: ./ab
   command: echo 'Usage docker-compose run stress ab -n 1000 -c 10 http://[DOCKER_IP|localhost]/'
 ```
+
+## Load Balancing
+
+So you now by now how the pieces interact. Let's take a closer look into **load balacing** itself.
+
+When you hit http://localhost/ nginx will get this request and will act upon according to its configuration file.
+
+Consul Template rewrites nginx config file according to the template file `nginx-loadbalancer.conf`:
+
+```
+upstream app {
+  least_conn;
+  {{range service "simple"}}
+  server  {{.Address}}:{{.Port}};
+  {{else}}server 127.0.0.1:65535;{{end}}
+}
+
+server {
+  listen 80 default_server;
+  location / {
+    proxy_pass http://app;
+  }
+}
+```
+
+In short, this template should be read like this:
+
+> Query Consul for services named "simple", and write its Address and Port inside **upstream app** block. All calls to port 80 will then be proxy_pass'ed to that **upstream**.
+
+The result of processing that template will be written to `/etc/nginx/conf.d/default.conf` inside nginx running container.
+You can see its contents with this command (given `dockerdrcon_nginx_1` is the name of the nginx container):
+
+```
+docker exec -ti dockerdrcon_nginx_1 cat /etc/nginx/conf.d/default.conf
+```
+
+It should look something like this:
+
+```
+upstream app {
+  least_conn;
+  
+  server  172.17.0.3:3000;
+  
+}
+
+server {
+  listen 80 default_server;
+  location / {
+    proxy_pass http://app;
+  }
+}
+```
+
