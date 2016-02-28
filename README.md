@@ -72,9 +72,7 @@ Here's a commented version of `docker-compose.yml`.
 
 ```yml
 # A service named "simple", which is actually an Express application with a Welcome page.
-# Two things to note here: 
-# 1. SERVICE_NAME environment variable
-# 2. There are no links to other containers.
+# Note there are no links to other containers.
 
 simple:
   build: ./web
@@ -109,6 +107,7 @@ registrator:
 
 # Nginx + Consul Template. It links to Consul to be able to make queries to update nginx config file.
 # It mounts a volume to map the template file (nginx-loadbalancer.conf) inside the container. 
+# Note there are no link to containers other than Consul.
 
 nginx:
   build: ./nginx
