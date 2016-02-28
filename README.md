@@ -187,13 +187,17 @@ You can see its contents with this command (given `dockerdrcon_nginx_1` is the n
 docker exec -ti dockerdrcon_nginx_1 cat /etc/nginx/conf.d/default.conf
 ```
 
-It should look something like this:
+If you scaled "simple" service to 3 containers running `docker-compose scale simple=3`, it should look something like this:
 
 ```
 upstream app {
   least_conn;
   
   server  172.17.0.3:3000;
+  
+  server  172.17.0.4:3000;
+  
+  server  172.17.0.5:3000;
   
 }
 
