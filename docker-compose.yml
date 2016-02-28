@@ -13,15 +13,6 @@ consul:
   environment:
     - SERVICE_IGNORE=true
 
-resolvable:
-  image: mgood/resolvable
-  hostname: resolvable
-  volumes:
-    - /var/run/docker.sock:/tmp/docker.sock
-    - /etc/resolv.conf:/tmp/resolv.conf
-  environment:
-    - SERVICE_IGNORE=true
-
 registrator:
   image: gliderlabs/registrator
   command: -internal consul://consul:8500
