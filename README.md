@@ -49,9 +49,80 @@ Try this before getting into how it works:
 
 1. Scale up the web to 3 containers: `docker-compose scale simple=3`
 2. Open another terminal to watch the logs: `docker-compose logs simple`
-3. Go back to the first terminal and stress test the app: `docker-compose stress ab -n 1000 -c 10 http://localhost/`
+3. Go back to the first terminal and stress test the app: `docker-compose run stress ab -n 1000 -c 10 http://localhost/`
 4. Watch the logs again. See how traffic is dispatched to every `simple` container?
  
 Enough fun. Let's get to how it works.
 
 # How it works
+
+This is just a summary of what's in Graham Jenson's article, with some extras regarding Docker Compose.
+
+It boils down to this (deep breathe):
+
+> When a new container is created or destroyed, [Registrator](https://github.com/gliderlabs/registrator) passes IP and exposed Ports to [Consul](https://www.consul.io/), which is frequently queried by [Consul Template](https://github.com/hashicorp/consul-template), which in turn writes that information into nginx configuration file and restarts [Nginx](http://nginx.org/)
+
+Let's see how these components are weaved together in `docker-compose.yml`.
+
+## Docker Compose
+
+Docker Compose starts all the necessary containers and links them together according to `docker-compose.yml` file.
+
+Here's a commented version of `docker-compose.yml`.
+
+```yml
+# A service named "simple", which is actually an Express application with a Welcome page.
+# Two things to note here: 
+# 1. SERVICE_NAME environment variable
+# 2. There are no links to other containers.
+
+simple:
+  build: ./web
+  environment:
+    - SERVICE_NAME=simple
+
+# Consul service. It maps port 8500 and 8600. Point a browser to http://localhost:8500 to see Consul`s control panel.  
+
+consul:
+  image: progrium/consul
+  command: -server -bootstrap -log-level debug
+  hostname: node
+  ports:
+    - 8500:8500
+    - 8600:53/udp
+  environment:
+    - SERVICE_IGNORE=true
+
+# Registrator service. It links to Consul to be able to call the API to de/register information about containers that come and go.
+
+registrator:
+  image: gliderlabs/registrator
+  command: -internal consul://consul:8500
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+  links:
+    - consul
+  environment:
+    - SERVICE_IGNORE=true
+
+# Nginx + Consul Template. It links to Consul to be able to make queries to update nginx config file.
+# It mounts a volume to map the template file (nginx-loadbalancer.conf) inside the container. 
+
+nginx:
+  build: ./nginx
+  links:
+    - consul
+  ports:
+    - 80:80
+    - 443:443
+  volumes:
+    - ./nginx/consul-templates/nginx-loadbalancer.conf:/etc/consul-templates/nginx.conf
+  environment:
+    - SERVICE_IGNORE=true
+
+# A container to run Apache Benchmark to stress test a URL.
+
+stress:
+  build: ./ab
+  command: echo 'Usage docker-compose run stress ab -n 1000 -c 10 http://[DOCKER_IP|localhost]/'
+```
