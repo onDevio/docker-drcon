@@ -38,3 +38,14 @@ nginx:
 stress:
   build: ./ab
   command: echo 'Usage docker-compose run stress ab -n 1000 -c 10 http://[DOCKER_IP|localhost]/'
+
+certs:
+  image: registry.gitlab.com/ondevio/certbot-godaddy
+  volumes:
+    - ./log:/var/log/letsencrypt
+    - /etc/letsencrypt:/etc/letsencrypt
+  environment:
+    - SERVICE_IGNORE=true
+    - DOMAIN_LIST=*.ondevio.com
+    - NOTIFICATION_EMAIL=info@ondevio.com
+    - API_KEY=${GODADDY_API_KEY}
